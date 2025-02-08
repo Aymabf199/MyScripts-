@@ -1,108 +1,88 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
-local _G = getrenv()
-
-_G.UnitDatabase = {
-    ["Golden Adult"] = {Code = "URxG0LD3N_2024", Rarity = 7},
-    ["Radiant Monarch"] = {Code = "SSRxR4D14NTv2", Rarity = 6},
-    ["Poseidon"] = {Code = "LRxP0S31D0N_X", Rarity = 8},
-    ["Dragon Mage"] = {Code = "DR4G0N_MKII", Rarity = 7},
-    ["Shadow Master"] = {Code = "SH4D0W_ELITE", Rarity = 6},
-    ["Celestial Guardian"] = {Code = "C3L3ST14Lv3", Rarity = 8},
-    ["Voidwalker"] = {Code = "V01D_W4LK3R", Rarity = 9},
-    ["Crimson Tyrant"] = {Code = "CR1MS0N_TYR4NT", Rarity = 7},
-    ["Eternal Phoenix"] = {Code = "PH03N1X_ET3RN4L", Rarity = 9},
-    ["Timekeeper"] = {Code = "T1M3K33P3R_Z", Rarity = 10}
+local secretUnits = {
+    ["Golden Adult"] = "UR_G0LD3N_SSS",
+    ["Radiant Monarch"] = "SSR_R4D14NT",
+    ["Poseidon"] = "LR_P0S31D0N",
+    ["Voidwalker"] = "MYTHIC_V01D",
+    ["Timekeeper"] = "DIV1NE_T1ME"
 }
 
-local function InjectUnit(unitData)
+local GUI = Instance.new("ScreenGui", game.CoreGui)
+GUI.Name = "AnimeDefendersHub_" .. math.random(1000, 9999)
+
+local MainFrame = Instance.new("Frame", GUI)
+MainFrame.Size = UDim2.new(0.35, 0, 0.6, 0)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local ScrollingFrame = Instance.new("ScrollingFrame", MainFrame)
+ScrollingFrame.Size = UDim2.new(0.9, 0, 0.8, 0)
+ScrollingFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #secretUnits * 60)
+
+local function SecureAddUnit(unitName, unitCode)
+    local args = {
+        unitCode,
+        "Secret",
+        HttpService:GenerateGUID(false),
+        os.time()
+    }
+    
+    task.wait(math.random(0.3, 1.2))
+    
     local success = pcall(function()
-        ReplicatedStorage.RemoteEvents.UnitPurchase:FireServer(
-            unitData.Code,
-            "Secret",
-            "PremiumPass"
-        )
+        ReplicatedStorage.RemoteEvents.UnitPurchase:FireServer(unpack(args))
         
-        if not player.Backpack:FindFirstChild(unitData.Code) then
-            local unitObject = Instance.new("StringValue")
-            unitObject.Name = unitData.Code
-            unitObject.Value = HttpService:JSONEncode({
-                UnitName = unitData.Name,
-                Timestamp = os.date("%Y-%m-%d %H:%M:%S")
-            })
-            unitObject.Parent = player.Backpack
+        if not player.Backpack:FindFirstChild(unitCode) then
+            local unit = Instance.new("StringValue")
+            unit.Name = unitCode
+            unit.Value = unitName
+            unit.Parent = player.Backpack
         end
     end)
     
     return success
 end
 
-local GUI = Instance.new("ScreenGui")
-GUI.Name = "UltimateHub_"..math.random(10000,99999)
-GUI.Parent = game:GetService("CoreGui")
-
-local MainFrame = Instance.new("Frame", GUI)
-MainFrame.Size = UDim2.new(0.95, 0, 0.8, 0)
-MainFrame.Position = UDim2.new(0.025, 0, 0.1, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-
-local ScrollingFrame = Instance.new("ScrollingFrame", MainFrame)
-ScrollingFrame.Size = UDim2.new(0.98, 0, 0.85, 0)
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #_G.UnitDatabase * 70)
-
 local yPos = 5
-for unitName, unitData in pairs(_G.UnitDatabase) do
+for unitName, unitCode in pairs(secretUnits) do
     local btn = Instance.new("TextButton", ScrollingFrame)
-    btn.Text = unitName.."\n★"..unitData.Rarity
-    btn.Size = UDim2.new(0.96, 0, 0, 65)
-    btn.Position = UDim2.new(0.02, 0, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    btn.Text = unitName
+    btn.Size = UDim2.new(0.9, 0, 0, 50)
+    btn.Position = UDim2.new(0.05, 0, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
     btn.TextColor3 = Color3.new(0.9, 0.9, 0.9)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
     
     btn.MouseButton1Click:Connect(function()
-        _G.SelectedUnit = unitData
         btn.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+        TweenService:Create(btn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+        }):Play()
+        
+        SecureAddUnit(unitName, unitCode)
     end)
     
-    yPos += 70
+    yPos += 55
 end
 
-local ExecuteBtn = Instance.new("TextButton", MainFrame)
-ExecuteBtn.Text = "🔥 CLAIM UNIT"
-ExecuteBtn.Size = UDim2.new(0.9, 0, 0.08, 0)
-ExecuteBtn.Position = UDim2.new(0.05, 0, 0.9, 0)
-ExecuteBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 150)
-ExecuteBtn.TextColor3 = Color3.new(1, 1, 1)
+local ClaimAllBtn = Instance.new("TextButton", MainFrame)
+ClaimAllBtn.Text = "Claim All Units"
+ClaimAllBtn.Size = UDim2.new(0.8, 0, 0.08, 0)
+ClaimAllBtn.Position = UDim2.new(0.1, 0, 0.9, 0)
+ClaimAllBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 150)
+ClaimAllBtn.TextColor3 = Color3.new(1, 1, 1)
 
-ExecuteBtn.MouseButton1Click:Connect(function()
-    if _G.SelectedUnit then
-        ExecuteBtn.Text = "⚡ PROCESSING..."
-        local success = InjectUnit(_G.SelectedUnit)
-        
-        if success then
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "✅ SUCCESS",
-                Text = "Unit added: ".._G.SelectedUnit.Code,
-                Duration = 5
-            })
-        else
-            ExecuteBtn.Text = "🔄 RETRYING..."
-            task.wait(1)
-            InjectUnit(_G.SelectedUnit)
-        end
-        
-        GUI:Destroy()
+ClaimAllBtn.MouseButton1Click:Connect(function()
+    for unitName, unitCode in pairs(secretUnits) do
+        SecureAddUnit(unitName, unitCode)
+        task.wait(0.5)
     end
-end)
-
-task.spawn(function()
-    while task.wait(5) do
-        GUI.Name = "Hub_"..HttpService:GenerateGUID(false)
-    end
+    GUI:Destroy()
 end)
