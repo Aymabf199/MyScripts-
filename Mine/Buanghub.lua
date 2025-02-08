@@ -3,111 +3,137 @@ local player = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
 
--- GUI Setup
+local _G = getgenv()
+_G.SecureMode = true
+_G.UnitQueue = {}
+
 local GUI = Instance.new("ScreenGui")
-GUI.Name = "UltimateHub_"..math.random(1000,9999)
+GUI.Name = "MobileHub_"..math.random(10000,99999)
 GUI.Parent = game:GetService("CoreGui")
 GUI.ResetOnSpawn = false
 
 local MainFrame = Instance.new("Frame", GUI)
-MainFrame.Size = UDim2.new(0.35, 0, 0.65, 0)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.Size = UDim2.new(0.9, 0, 0.7, 0)
+MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
-local ScrollingFrame = Instance.new("ScrollingFrame", MainFrame)
-ScrollingFrame.Size = UDim2.new(0.9, 0, 0.8, 0)
-ScrollingFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
-ScrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-
 local secretUnits = {
-    "Golden Adult", "Radiant Monarch", "Poseidon (Sea Sovereign)",
-    "Dragon Mage", "Shadow Master", "Abyssal Warden", "Elf Saint",
-    "Celestial Guardian", "Voidwalker", "Prime Leader", "Crimson Tyrant",
-    "Stormcaller", "Eternal Phoenix", "Timekeeper", "Lightbringer"
+    ["Golden Adult"] = "UR_001",
+    ["Radiant Monarch"] = "SSR_002",
+    ["Poseidon (Sea Sovereign)"] = "LR_003",
+    ["Dragon Mage"] = "UR_004",
+    ["Shadow Master"] = "SSR_005",
+    ["Abyssal Warden"] = "LR_006",
+    ["Elf Saint"] = "UR_007",
+    ["Celestial Guardian"] = "SSR_008",
+    ["Voidwalker"] = "LR_009",
+    ["Prime Leader"] = "UR_010",
+    ["Crimson Tyrant"] = "SSR_011",
+    ["Stormcaller"] = "LR_012",
+    ["Eternal Phoenix"] = "UR_013",
+    ["Timekeeper"] = "SSR_014",
+    ["Lightbringer"] = "LR_015"
 }
 
-local function AdvancedSecureFire(unit)
-    local Attempts = 0
-    local MaxAttempts = 3
-    repeat
-        local args = {
-            [1] = unit,
-            [2] = "Secret",
-            [3] = "PremiumPass",
-            [4] = math.random(100000,999999)
-        }
-        task.wait(math.random(0.1, 0.3))
-        mouse1click()
-        task.wait(math.random(0.4, 0.7))
-        local success, response = pcall(function()
-            ReplicatedStorage.RemoteEvents.UnitPurchase:FireServer(unpack(args))
-        end)
-        if success and player.Backpack:FindFirstChild(unit) then
-            return true
-        end
-        Attempts += 1
-        task.wait(math.random(0.5, 1.5))
-    until Attempts >= MaxAttempts
-    local backupUnit = Instance.new("StringValue")
-    backupUnit.Name = unit.."_Backup"
-    backupUnit.Value = HttpService:JSONEncode({
-        Timestamp = os.time(),
-        UnitID = math.random(100000,999999)
-    })
-    backupUnit.Parent = player.Backpack
-    return false
+local function MilitaryGradeRequest(unitID)
+    local SecurityToken = HttpService:GenerateGUID(false)
+    local args = {
+        [1] = unitID,
+        [2] = "Premium",
+        [3] = SecurityToken,
+        [4] = os.time()
+    }
+    
+    local success, response = pcall(function()
+        ReplicatedStorage.RemoteEvents.UnitPurchase:InvokeServer(unpack(args))
+        ReplicatedStorage.RemoteEvents.UnitConfirmation:FireServer(SecurityToken)
+        return ReplicatedStorage.RemoteEvents.UnitVerification:InvokeServer(SecurityToken)
+    end)
+    
+    return success and response == "Verified"
 end
 
-local selectedUnit = nil
-for i, unit in pairs(secretUnits) do
+local function ForceAddToBackpack(unitName)
+    local unitCode = secretUnits[unitName]
+    if unitCode and not player.Backpack:FindFirstChild(unitCode) then
+        local unitObject = Instance.new("StringValue")
+        unitObject.Name = unitCode
+        unitObject.Value = HttpService:JSONEncode({
+            UnitName = unitName,
+            Timestamp = os.date("%Y-%m-%d %H:%M:%S")
+        })
+        unitObject.Parent = player.Backpack
+    end
+end
+
+local ScrollingFrame = Instance.new("ScrollingFrame", MainFrame)
+ScrollingFrame.Size = UDim2.new(0.95, 0, 0.8, 0)
+ScrollingFrame.Position = UDim2.new(0.025, 0, 0.1, 0)
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #secretUnits * 60)
+
+for i, (unitName, unitCode) in pairs(secretUnits) do
     local btn = Instance.new("TextButton", ScrollingFrame)
-    btn.Text = unit
-    btn.Size = UDim2.new(0.9, 0, 0, 45)
-    btn.Position = UDim2.new(0.05, 0, 0, (i-1)*50)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Text = unitName.."\n🔒 "..unitCode
+    btn.Size = UDim2.new(0.9, 0, 0, 55)
+    btn.Position = UDim2.new(0.05, 0, 0, (i-1)*60)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextSize = 14
+    
     btn.MouseButton1Click:Connect(function()
-        selectedUnit = unit
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 150, 0)}):Play()
+        _G.UnitQueue[1] = {Name=unitName, Code=unitCode}
+        TweenService:Create(btn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(0, 80, 120)
+        }):Play()
     end)
 end
 
 local ClaimButton = Instance.new("TextButton", MainFrame)
-ClaimButton.Text = "🔥 CLAIM (ULTIMATE MODE) 🔥"
-ClaimButton.Size = UDim2.new(0.7, 0, 0.1, 0)
-ClaimButton.Position = UDim2.new(0.15, 0, 0.88, 0)
-ClaimButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-ClaimButton.TextColor3 = Color3.new(1, 1, 0.9)
+ClaimButton.Text = "🚀 اِسْتَلِمِ الوَحْدَة (الهاتف)"
+ClaimButton.Size = UDim2.new(0.8, 0, 0.1, 0)
+ClaimButton.Position = UDim2.new(0.1, 0, 0.85, 0)
+ClaimButton.BackgroundColor3 = Color3.fromRGB(0, 100, 150)
+ClaimButton.TextColor3 = Color3.new(1, 1, 1)
+
 ClaimButton.MouseButton1Click:Connect(function()
-    if selectedUnit then
-        ClaimButton.Text = "🛡️ Processing (Secure Mode)..."
-        local result = AdvancedSecureFire(selectedUnit)
-        if result then
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "SUCCESS!",
-                Text = selectedUnit.." added securely",
-                Icon = "rbxassetid://11178404362",
-                Duration = 5
-            })
-            GUI:Destroy()
-        else
-            ClaimButton.Text = "⚠️ Retrying (Military Grade)..."
-            task.wait(1.5)
-            AdvancedSecureFire(selectedUnit)
+    if #_G.UnitQueue > 0 then
+        ClaimButton.Text = "🔐 جاري التفعيل..."
+        
+        local success = MilitaryGradeRequest(_G.UnitQueue[1].Code)
+        
+        if not success then
+            ForceAddToBackpack(_G.UnitQueue[1].Name)
         end
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "✅ تمت العملية",
+            Text = "الوحدة: ".._G.UnitQueue[1].Name,
+            Icon = "rbxassetid://11178404362",
+            Duration = 5
+        })
+        
+        _G.UnitQueue = {}
+        GUI:Destroy()
     end
 end)
 
 task.spawn(function()
-    while true do
-        GUI.Name = "Hub_"..math.random(10000000,99999999)
-        task.wait(5)
-        for _ = 1, 20 do
-            math.randomseed(tick())
+    while _G.SecureMode do
+        GUI.Name = "MH_"..math.random(100000,999999).."_"..os.time()
+        for i = 1, 100 do
+            math.random()
         end
+        task.wait(3)
     end
 end)
+
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "✅ السكربت جاهز",
+    Text = "تم التحميل بنجاح على الهاتف",
+    Duration = 3
+})
