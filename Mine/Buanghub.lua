@@ -1,86 +1,62 @@
--- Phantom Mobile Injector (Continuous Memory Bypass)
+-- Simple Mobile Unit Adder (Client-Side Only)
 local Player = game:GetService("Players").LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 
--- Stealth Mobile Interface
-local GhostFrame = Instance.new("Frame")
-GhostFrame.Size = UDim2.new(0.2, 0, 0.1, 0)
-GhostFrame.Position = UDim2.new(0.78, 0, 0.02, 0)
-GhostFrame.BackgroundTransparency = 1
-GhostFrame.Parent = CoreGui
+-- Mobile Interface
+local UnitFrame = Instance.new("Frame")
+UnitFrame.Size = UDim2.new(0.25,0,0.1,0)
+UnitFrame.Position = UDim2.new(0.75,0,0.05,0)
+UnitFrame.BackgroundTransparency = 0.8
+UnitFrame.BackgroundColor3 = Color3.new(0,0,0)
+UnitFrame.Parent = CoreGui
 
-local InjectButton = Instance.new("TextButton")
-InjectButton.Size = UDim2.new(1, 0, 1, 0)
-InjectButton.Text = "🌀\nUNLOCK"
-InjectButton.TextSize = 14
-InjectButton.BackgroundTransparency = 0.7
-InjectButton.TextColor3 = Color3.new(1, 1, 1)
-InjectButton.Parent = GhostFrame
+local AddButton = Instance.new("TextButton")
+AddButton.Size = UDim2.new(1,0,1,0)
+AddButton.Text = "➕ GET 6★"
+AddButton.TextSize = 14
+AddButton.TextColor3 = Color3.new(1,1,1)
+AddButton.Parent = UnitFrame
 
--- Permanent Memory Override
-local function HijackGameMemory()
-    local env = getrenv()
-    local original = env.ValidateUnit or function() return true end
-    env.ValidateUnit = function(...) return true end
+-- Basic Unit Creation
+local function CreateBasicUnit(name)
+    local tool = Instance.new("Tool")
+    tool.Name = name
     
-    if env.UpdateInventory then
-        env.UpdateInventory = function() end
-    end
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(1,1,1)
+    handle.Transparency = 0.5
+    
+    local starTag = Instance.new("IntValue")
+    starTag.Name = "Stars"
+    starTag.Value = 6
+    
+    handle.Parent = tool
+    starTag.Parent = tool
+    
+    return tool
 end
 
--- Instant Unit Flood
-local function AdminUnitDump()
-    local Backpack = Player:FindFirstChild("Backpack") 
+AddButton.MouseButton1Click:Connect(function()
+    local backpack = Player:FindFirstChild("Backpack") 
     or Instance.new("Backpack", Player)
-
-    local EliteUnits = {
-        "Gojo", "Luffy", "Zoro", "Goku", 
-        "Naruto", "Sasuke", "Madara", "Levi",
-        "Eren", "Tanjiro", "Itachi", "Kakashi"
+    
+    local units = {
+        "Gojo", "Luffy", "Zoro", "Goku",
+        "Naruto", "Sasuke", "Levi", "Tanjiro"
     }
-
-    for _, unit in pairs(EliteUnits) do
-        local NewUnit = Instance.new("Tool")
-        NewUnit.Name = "[6★] "..unit
-        
-        local Handle = Instance.new("Part")
-        Handle.Name = "Handle"
-        Handle.Transparency = 1
-        
-        local Metadata = Instance.new("IntValue")
-        Metadata.Name = "Stars"
-        Metadata.Value = 6
-        
-        Handle.Parent = NewUnit
-        Metadata.Parent = NewUnit
-        NewUnit.Parent = Backpack
-    end
-end
-
--- Permanent Injection System
-InjectButton.MouseButton1Click:Connect(function()
-    HijackGameMemory()
-    AdminUnitDump()
     
-    -- Fake Admin Alert
+    for _, name in pairs(units) do
+        CreateBasicUnit(name).Parent = backpack
+    end
+    
+    -- Simple Notification
     game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync(
-        "[System] 6★ Units Force-Unlocked (Admin)"
+        "Units added: " .. #backpack:GetChildren()
     )
-    
-    -- Continuous Memory Refresh
-    while wait(10) do
-        HijackGameMemory()
-    end
 end)
 
--- Mobile Optimization
-GhostFrame.Active = true
-GhostFrame.Draggable = true
-GhostFrame.Selectable = true
-InjectButton.Modal = true
-
--- Auto-Respawn Protection
-Player.CharacterAdded:Connect(function()
-    HijackGameMemory()
-    AdminUnitDump()
-end)
+-- Mobile Settings
+UnitFrame.Active = true
+UnitFrame.Draggable = true
+UnitFrame.Selectable = true
