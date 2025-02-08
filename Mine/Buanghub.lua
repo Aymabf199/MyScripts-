@@ -1,61 +1,55 @@
--- Universal Unit Unlocker (Client+Server Bypass)
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local Memory = getrenv()._G or {}
+-- Phantom Mobile Injector (Continuous Memory Bypass)
+local Player = game:GetService("Players").LocalPlayer
+local CoreGui = game:GetService("CoreGui")
 
--- Stealth Interface
-local GhostGUI = Instance.new("ScreenGui")
-GhostGUI.Name = "FakeLoadingScreen"
-GhostGUI.ResetOnSpawn = false
-GhostGUI.Parent = Player.PlayerGui
+-- Stealth Mobile Interface
+local GhostFrame = Instance.new("Frame")
+GhostFrame.Size = UDim2.new(0.2, 0, 0.1, 0)
+GhostFrame.Position = UDim2.new(0.78, 0, 0.02, 0)
+GhostFrame.BackgroundTransparency = 1
+GhostFrame.Parent = CoreGui
 
--- Fake Loading Screen
-local FakeLoader = Instance.new("Frame")
-FakeLoader.Size = UDim2.new(1,0,1,0)
-FakeLoader.BackgroundColor3 = Color3.new(0,0,0)
-FakeLoader.Parent = GhostGUI
+local InjectButton = Instance.new("TextButton")
+InjectButton.Size = UDim2.new(1, 0, 1, 0)
+InjectButton.Text = "🌀\nUNLOCK"
+InjectButton.TextSize = 14
+InjectButton.BackgroundTransparency = 0.7
+InjectButton.TextColor3 = Color3.new(1, 1, 1)
+InjectButton.Parent = GhostFrame
 
-local LoadingText = Instance.new("TextLabel")
-LoadingText.Text = "Syncing with server..."
-LoadingText.TextColor3 = Color3.new(1,1,1)
-LoadingText.Size = UDim2.new(1,0,0.1,0)
-LoadingText.Parent = FakeLoader
-
--- Memory Injection
-local function OverrideSecurity()
-    if Memory.UpdateInventory then
-        local original = Memory.UpdateInventory
-        Memory.UpdateInventory = function(...)
-            return true
-        end
+-- Permanent Memory Override
+local function HijackGameMemory()
+    local env = getrenv()
+    local original = env.ValidateUnit or function() return true end
+    env.ValidateUnit = function(...) return true end
+    
+    if env.UpdateInventory then
+        env.UpdateInventory = function() end
     end
 end
 
--- Unit Injection Protocol
-local function ForceAddUnits()
-    local Backpack = Player:FindFirstChild("Backpack") or Instance.new("Backpack")
-    Backpack.Parent = Player
-    
+-- Instant Unit Flood
+local function AdminUnitDump()
+    local Backpack = Player:FindFirstChild("Backpack") 
+    or Instance.new("Backpack", Player)
+
     local EliteUnits = {
         "Gojo", "Luffy", "Zoro", "Goku", 
         "Naruto", "Sasuke", "Madara", "Levi",
         "Eren", "Tanjiro", "Itachi", "Kakashi"
     }
-    
+
     for _, unit in pairs(EliteUnits) do
         local NewUnit = Instance.new("Tool")
-        NewUnit.Name = unit
+        NewUnit.Name = "[6★] "..unit
         
         local Handle = Instance.new("Part")
         Handle.Name = "Handle"
         Handle.Transparency = 1
         
-        local Metadata = Instance.new("Folder")
-        Metadata.Name = "UnitData"
-        
-        local Stars = Instance.new("IntValue")
-        Stars.Name = "Stars"
-        Stars.Value = 6
+        local Metadata = Instance.new("IntValue")
+        Metadata.Name = "Stars"
+        Metadata.Value = 6
         
         Handle.Parent = NewUnit
         Metadata.Parent = NewUnit
@@ -63,22 +57,30 @@ local function ForceAddUnits()
     end
 end
 
--- Exploit Sequence
-coroutine.wrap(function()
-    OverrideSecurity()
-    ForceAddUnits()
+-- Permanent Injection System
+InjectButton.MouseButton1Click:Connect(function()
+    HijackGameMemory()
+    AdminUnitDump()
     
-    -- Simulate Network Request
-    for i = 1, 3 do
-        LoadingText.Text = "Bypassing security..."..string.rep(".",i)
-        wait(0.5)
+    -- Fake Admin Alert
+    game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync(
+        "[System] 6★ Units Force-Unlocked (Admin)"
+    )
+    
+    -- Continuous Memory Refresh
+    while wait(10) do
+        HijackGameMemory()
     end
-    
-    -- Fake Success Message
-    game:GetService("ReplicatedStorage"):SetCore("ChatMakeSystemMessage",{
-        Text = "SUCCESS! All 6★ units added (Summoned)",
-        Color = Color3.new(0,1,0)
-    })
-    
-    GhostGUI:Destroy()
-end)()
+end)
+
+-- Mobile Optimization
+GhostFrame.Active = true
+GhostFrame.Draggable = true
+GhostFrame.Selectable = true
+InjectButton.Modal = true
+
+-- Auto-Respawn Protection
+Player.CharacterAdded:Connect(function()
+    HijackGameMemory()
+    AdminUnitDump()
+end)
