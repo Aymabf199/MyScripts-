@@ -1,59 +1,63 @@
-local Player = game:GetService("Players").LocalPlayer
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
 local GUI = Instance.new("ScreenGui")
 local Button = Instance.new("TextButton")
 
-GUI.Name = "6StarSystem"
+GUI.Name = "6StarInjector"
+GUI.ResetOnSpawn = false
 GUI.Parent = Player:WaitForChild("PlayerGui")
 
-Button.Name = "GetAll6Star"
-Button.Size = UDim2.new(0.45, 0, 0.12, 0)
-Button.Position = UDim2.new(0.275, 0, 0.8, 0)
-Button.Text = "GET ALL 6★ CHARACTERS"
-Button.BackgroundColor3 = Color3.new(0, 0.6, 0)
-Button.TextColor3 = Color3.new(1, 1, 1)
+Button.Size = UDim2.new(0.85,0,0.18,0)
+Button.Position = UDim2.new(0.075,0,0.75,0)
+Button.BackgroundColor3 = Color3.new(0.2,0.7,0.2)
+Button.TextColor3 = Color3.new(1,1,1)
 Button.TextScaled = true
+Button.Text = "INSTANT 6★ CHARACTERS"
 Button.Parent = GUI
 
 local Characters = {
-    ["Gojo"] = {Stars = 6, ModelId = "rbxassetid://000001"},
-    ["Zoro"] = {Stars = 6, ModelId = "rbxassetid://000002"},
-    ["Luffy"] = {Stars = 6, ModelId = "rbxassetid://000003"},
-    ["Naruto"] = {Stars = 6, ModelId = "rbxassetid://000004"},
-    ["Sasuke"] = {Stars = 6, ModelId = "rbxassetid://000005"},
-    ["Tanjiro"] = {Stars = 6, ModelId = "rbxassetid://000006"},
-    ["Levi"] = {Stars = 6, ModelId = "rbxassetid://000007"},
-    ["Goku"] = {Stars = 6, ModelId = "rbxassetid://000008"}
+    ["Gojo"] = 6,
+    ["Luffy"] = 6,
+    ["Zoro"] = 6,
+    ["Naruto"] = 6,
+    ["Sasuke"] = 6,
+    ["Goku"] = 6,
+    ["Tanjiro"] = 6,
+    ["Levi"] = 6,
+    ["Itachi"] = 6,
+    ["Vegeta"] = 6
 }
 
-local function AddCharacters()
-    if not Player.Backpack then
+local function CreateTool(name)
+    local tool = Instance.new("Tool")
+    tool.Name = name
+    
+    local stars = Instance.new("IntValue")
+    stars.Name = "Stars"
+    stars.Value = 6
+    stars.Parent = tool
+    
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(2,2,2)
+    handle.Parent = tool
+    
+    return tool
+end
+
+Button.MouseButton1Click:Connect(function()
+    if not Player:FindFirstChild("Backpack") then
         Instance.new("Backpack").Parent = Player
     end
     
-    Player.Backpack:Clear()
-    
-    for CharName, Data in pairs(Characters) do
-        local Tool = Instance.new("Tool")
-        Tool.Name = CharName
-        
-        local StarsValue = Instance.new("IntValue")
-        StarsValue.Name = "Stars"
-        StarsValue.Value = 6
-        StarsValue.Parent = Tool
-        
-        local Handle = Instance.new("Part")
-        Handle.Name = "Handle"
-        Handle.Size = Vector3.new(2, 2, 2)
-        Handle.Parent = Tool
-        
-        Tool.Parent = Player.Backpack
+    for charName in pairs(Characters) do
+        local tool = CreateTool(charName)
+        tool.Parent = Player.Backpack
     end
     
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "SUCCESS!",
-        Text = #Player.Backpack:GetChildren().." 6★ Added",
+    game:GetService("StarterGui"):SetCore("SendNotification",{
+        Title = "COMPLETED",
+        Text = table.concat({"All",tostring(#Player.Backpack:GetChildren()),"6★ added"}," "),
         Duration = 3
     })
-end
-
-Button.MouseButton1Click:Connect(AddCharacters)
+end)
