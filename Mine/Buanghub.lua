@@ -1,3 +1,4 @@
+-- Mine/Buanghub.lua
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
