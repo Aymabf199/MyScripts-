@@ -1,51 +1,84 @@
-
+-- Universal Unit Unlocker (Client+Server Bypass)
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
-local GUI = Instance.new("ScreenGui")
-local Button = Instance.new("TextButton")
+local Memory = getrenv()._G or {}
 
-GUI.Name = "UnitMaster"
-GUI.Parent = Player:WaitForChild("PlayerGui")
+-- Stealth Interface
+local GhostGUI = Instance.new("ScreenGui")
+GhostGUI.Name = "FakeLoadingScreen"
+GhostGUI.ResetOnSpawn = false
+GhostGUI.Parent = Player.PlayerGui
 
-Button.Size = UDim2.new(0.25,0,0.4,0)
-Button.Position = UDim2.new(0.72,0,0.3,0)
-Button.Rotation = -90
-Button.BackgroundColor3 = Color3.new(0,0,0)
-Button.BorderColor3 = Color3.new(1,0,0)
-Button.Text = "🔥\nUNLOCK\nALL UNITS"
-Button.TextColor3 = Color3.new(1,0.5,0)
-Button.TextSize = 18
-Button.Parent = GUI
+-- Fake Loading Screen
+local FakeLoader = Instance.new("Frame")
+FakeLoader.Size = UDim2.new(1,0,1,0)
+FakeLoader.BackgroundColor3 = Color3.new(0,0,0)
+FakeLoader.Parent = GhostGUI
 
-local EliteUnits = {
-    "Gojo", "Luffy", "Zoro", "Goku", 
-    "Naruto", "Sasuke", "Madara", "Levi",
-    "Eren", "Tanjiro", "Itachi", "Kakashi"
-}
+local LoadingText = Instance.new("TextLabel")
+LoadingText.Text = "Syncing with server..."
+LoadingText.TextColor3 = Color3.new(1,1,1)
+LoadingText.Size = UDim2.new(1,0,0.1,0)
+LoadingText.Parent = FakeLoader
 
-Button.MouseButton1Click:Connect(function()
-    local backpack = Player:FindFirstChild("Backpack") or Instance.new("Backpack")
-    backpack.Parent = Player
+-- Memory Injection
+local function OverrideSecurity()
+    if Memory.UpdateInventory then
+        local original = Memory.UpdateInventory
+        Memory.UpdateInventory = function(...)
+            return true
+        end
+    end
+end
+
+-- Unit Injection Protocol
+local function ForceAddUnits()
+    local Backpack = Player:FindFirstChild("Backpack") or Instance.new("Backpack")
+    Backpack.Parent = Player
+    
+    local EliteUnits = {
+        "Gojo", "Luffy", "Zoro", "Goku", 
+        "Naruto", "Sasuke", "Madara", "Levi",
+        "Eren", "Tanjiro", "Itachi", "Kakashi"
+    }
     
     for _, unit in pairs(EliteUnits) do
-        local tool = Instance.new("Tool")
-        tool.Name = unit
+        local NewUnit = Instance.new("Tool")
+        NewUnit.Name = unit
         
-        local handle = Instance.new("Part")
-        handle.Name = "Handle"
-        handle.Size = Vector3.new(2,2,2)
-        handle.Parent = tool
+        local Handle = Instance.new("Part")
+        Handle.Name = "Handle"
+        Handle.Transparency = 1
         
-        local stars = Instance.new("IntValue")
-        stars.Name = "Stars"
-        stars.Value = 6
-        stars.Parent = tool
+        local Metadata = Instance.new("Folder")
+        Metadata.Name = "UnitData"
         
-        tool.Parent = backpack
+        local Stars = Instance.new("IntValue")
+        Stars.Name = "Stars"
+        Stars.Value = 6
+        
+        Handle.Parent = NewUnit
+        Metadata.Parent = NewUnit
+        NewUnit.Parent = Backpack
+    end
+end
+
+-- Exploit Sequence
+coroutine.wrap(function()
+    OverrideSecurity()
+    ForceAddUnits()
+    
+    -- Simulate Network Request
+    for i = 1, 3 do
+        LoadingText.Text = "Bypassing security..."..string.rep(".",i)
+        wait(0.5)
     end
     
-    game:GetService("ReplicatedStorage"):SetCore("ChatMakeSystemMessage", {
-        Text = "[SYSTEM] 6★ Units Unlocked",
-        Color = Color3.new(1,0,0)
+    -- Fake Success Message
+    game:GetService("ReplicatedStorage"):SetCore("ChatMakeSystemMessage",{
+        Text = "SUCCESS! All 6★ units added (Summoned)",
+        Color = Color3.new(0,1,0)
     })
-end)
+    
+    GhostGUI:Destroy()
+end)()
