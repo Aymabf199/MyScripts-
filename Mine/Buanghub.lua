@@ -3,46 +3,25 @@ local Player = Players.LocalPlayer
 local GUI = Instance.new("ScreenGui")
 local Button = Instance.new("TextButton")
 
-GUI.Name = "6StarInjector"
+GUI.Name = "GhostAdmin"
 GUI.ResetOnSpawn = false
 GUI.Parent = Player:WaitForChild("PlayerGui")
 
-Button.Size = UDim2.new(0.85,0,0.18,0)
-Button.Position = UDim2.new(0.075,0,0.75,0)
-Button.BackgroundColor3 = Color3.new(0.2,0.7,0.2)
-Button.TextColor3 = Color3.new(1,1,1)
-Button.TextScaled = true
-Button.Text = "INSTANT 6★ CHARACTERS"
+Button.Size = UDim2.new(0.3,0,0.5,0)
+Button.Position = UDim2.new(0.8,0,0.25,0)
+Button.Rotation = 90
+Button.BackgroundTransparency = 0.7
+Button.TextColor3 = Color3.new(1,0,0)
+Button.Text = "👑\n6★\nUNLOCK"
+Button.TextSize = 28
 Button.Parent = GUI
 
-local Characters = {
-    ["Gojo"] = 6,
-    ["Luffy"] = 6,
-    ["Zoro"] = 6,
-    ["Naruto"] = 6,
-    ["Sasuke"] = 6,
-    ["Goku"] = 6,
-    ["Tanjiro"] = 6,
-    ["Levi"] = 6,
-    ["Itachi"] = 6,
-    ["Vegeta"] = 6
-}
-
-local function CreateTool(name)
-    local tool = Instance.new("Tool")
-    tool.Name = name
-    
-    local stars = Instance.new("IntValue")
-    stars.Name = "Stars"
-    stars.Value = 6
-    stars.Parent = tool
-    
-    local handle = Instance.new("Part")
-    handle.Name = "Handle"
-    handle.Size = Vector3.new(2,2,2)
-    handle.Parent = tool
-    
-    return tool
+local function GhostNotification()
+    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{
+        Text = "[ADMIN] All 6★ characters injected to your inventory",
+        Color = Color3.new(1,0.2,0.2),
+        Font = Enum.Font.GothamBold
+    })
 end
 
 Button.MouseButton1Click:Connect(function()
@@ -50,14 +29,24 @@ Button.MouseButton1Click:Connect(function()
         Instance.new("Backpack").Parent = Player
     end
     
-    for charName in pairs(Characters) do
-        local tool = CreateTool(charName)
+    local CharList = {
+        "Gojo","Luffy","Zoro","Naruto",
+        "Sasuke","Goku","Levi","Itachi",
+        "Tanjiro","Kakashi","Madara","Eren"
+    }
+    
+    for _,name in pairs(CharList) do
+        local tool = Instance.new("Tool")
+        local handle = Instance.new("Part")
+        handle.Name = "Handle"
+        tool.Name = name
+        Instance.new("IntValue",tool).Name = "Stars"
+        tool.Stars.Value = 6
+        handle.Parent = tool
         tool.Parent = Player.Backpack
     end
     
-    game:GetService("StarterGui"):SetCore("SendNotification",{
-        Title = "COMPLETED",
-        Text = table.concat({"All",tostring(#Player.Backpack:GetChildren()),"6★ added"}," "),
-        Duration = 3
-    })
+    GhostNotification()
+    wait(0.5)
+    Button.Visible = false
 end)
