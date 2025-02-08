@@ -94,7 +94,7 @@ for i, (unitName, unitCode) in pairs(secretUnits) do
 end
 
 local ClaimButton = Instance.new("TextButton", MainFrame)
-ClaimButton.Text = "🚀 اِسْتَلِمِ الوَحْدَة (الهاتف)"
+ClaimButton.Text = "🚀 Claim Unit (Mobile)"
 ClaimButton.Size = UDim2.new(0.8, 0, 0.1, 0)
 ClaimButton.Position = UDim2.new(0.1, 0, 0.85, 0)
 ClaimButton.BackgroundColor3 = Color3.fromRGB(0, 100, 150)
@@ -102,7 +102,7 @@ ClaimButton.TextColor3 = Color3.new(1, 1, 1)
 
 ClaimButton.MouseButton1Click:Connect(function()
     if #_G.UnitQueue > 0 then
-        ClaimButton.Text = "🔐 جاري التفعيل..."
+        ClaimButton.Text = "🔐 Processing..."
         
         local success = MilitaryGradeRequest(_G.UnitQueue[1].Code)
         
@@ -111,8 +111,8 @@ ClaimButton.MouseButton1Click:Connect(function()
         end
         
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "✅ تمت العملية",
-            Text = "الوحدة: ".._G.UnitQueue[1].Name,
+            Title = "✅ Operation Successful",
+            Text = "Unit: ".._G.UnitQueue[1].Name,
             Icon = "rbxassetid://11178404362",
             Duration = 5
         })
@@ -133,7 +133,7 @@ task.spawn(function()
 end)
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "✅ السكربت جاهز",
-    Text = "تم التحميل بنجاح على الهاتف",
+    Title = "✅ Script Ready",
+    Text = "Successfully loaded on mobile",
     Duration = 3
 })
