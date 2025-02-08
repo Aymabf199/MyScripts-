@@ -35,30 +35,32 @@ local SecretUnits = {
 }
 
 local GUI = Instance.new("ScreenGui")
-GUI.Name = "X_"..GenID()
+GUI.Name = "MobileHub_"..GenID()
 GUI.Parent = game.CoreGui
 
 local Main = Instance.new("Frame")
-Main.Size = Run:IsMobile() and UDim2.new(0.95,0,0.9,0) or UDim2.new(0.35,0,0.6,0)
+Main.Size = UDim2.new(0.95,0,0.9,0)
 Main.Position = UDim2.new(0.5,0,0.5,0)
 Main.AnchorPoint = Vector2.new(0.5,0.5)
 Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
 Main.Parent = GUI
 
 local Scroll = Instance.new("ScrollingFrame")
-Scroll.Size = UDim2.new(1, -10,1, -60)
+Scroll.Size = UDim2.new(1,-10,1,-60)
 Scroll.Position = UDim2.new(0,5,0,5)
-Scroll.CanvasSize = UDim2.new(0,0,0,#SecretUnits*65)
+Scroll.CanvasSize = UDim2.new(0,0,0,#SecretUnits*70)
+Scroll.ScrollBarThickness = 5
 Scroll.Parent = Main
 
 for idx, (unitName, unitCode) in pairs(SecretUnits) do
     local btn = Instance.new("TextButton")
-    btn.Text = unitName.." | "..unitCode
-    btn.Size = UDim2.new(1,-10,0,60)
-    btn.Position = UDim2.new(0,5,0,(idx-1)*65)
+    btn.Text = unitName.."\n"..unitCode
+    btn.Size = UDim2.new(1,-10,0,65)
+    btn.Position = UDim2.new(0,5,0,(idx-1)*70)
     btn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-    btn.Font = Enum.Font.GothamBlack
+    btn.Font = Enum.Font.GothamBold
     btn.TextColor3 = Color3.new(1,1,1)
+    btn.TextSize = 14
     btn.Parent = Scroll
 
     btn.MouseButton1Click:Connect(function()
@@ -67,12 +69,13 @@ for idx, (unitName, unitCode) in pairs(SecretUnits) do
 end
 
 local Claim = Instance.new("TextButton")
-Claim.Text = "🔥 INSTANT UNLOCK (GOD MODE)"
+Claim.Text = "🚀 INSTANT UNLOCK"
 Claim.Size = UDim2.new(1,-10,0,50)
 Claim.Position = UDim2.new(0,5,1,-55)
-Claim.BackgroundColor3 = Color3.fromRGB(200,0,0)
-Claim.Font = Enum.Font.GothamBold
+Claim.BackgroundColor3 = Color3.fromRGB(0,120,200)
+Claim.Font = Enum.Font.GothamBlack
 Claim.TextColor3 = Color3.new(1,1,1)
+Claim.TextSize = 16
 Claim.Parent = Main
 
 Claim.MouseButton1Click:Connect(function()
@@ -101,6 +104,6 @@ end)
 
 coroutine.wrap(function()
     while task.wait(math.random(2,5)) do
-        GUI.Name = "X_"..GenID()
+        GUI.Name = "MH_"..GenID()
     end
 end)()
