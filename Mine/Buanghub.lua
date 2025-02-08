@@ -1,124 +1,106 @@
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
+local RS = game:GetService("ReplicatedStorage")
+local HS = game:GetService("HttpService")
+local Run = game:GetService("RunService")
 
-local player = Players.LocalPlayer
+local Player = Players.LocalPlayer
 local _G = getgenv()
-_G.SecureMode = true
-_G.UnitQueue = {}
+_G.UnitList = {}
 
-local function GenerateHWID()
-    return string.format("%X-%X-%X-%X",
-        math.random(0x10000000, 0xFFFFFFFF),
-        math.random(0x1000, 0xFFFF),
-        math.random(0x1000, 0xFFFF),
-        math.random(0x1000, 0xFFFF)
+local function GenID()
+    return string.format("%X|%X|%X", 
+        math.random(0x10000000,0xFFFFFFFF), 
+        math.random(0x1000,0xFFFF), 
+        os.time()
     )
 end
 
-local secretUnits = {
+local SecretUnits = {
     ["Golden Adult"] = "UR_001",
     ["Radiant Monarch"] = "SSR_002",
     ["Crimson Tyrant"] = "SSR_011",
-    ["Draconic Warrior"] = "BP_101",
+    ["Poseidon"] = "LR_003",
+    ["Dragon Mage"] = "UR_004",
+    ["Abyssal Warden"] = "LR_006",
+    ["Elf Saint"] = "UR_007",
+    ["Celestial Guardian"] = "SSR_008",
+    ["Voidwalker"] = "LR_009",
     ["Prime Leader"] = "UR_010",
-    ["Garcia (Red One)"] = "EV_202"
+    ["Stormcaller"] = "LR_012",
+    ["Eternal Phoenix"] = "UR_013",
+    ["Timekeeper"] = "SSR_014",
+    ["Lightbringer"] = "LR_015",
+    ["∞ Celestial King"] = "GOD_001",
+    ["Ω Void Titan"] = "GOD_002"
 }
 
 local GUI = Instance.new("ScreenGui")
-GUI.Name = "MH_"..GenerateHWID()
-GUI.Parent = game:GetService("CoreGui")
-GUI.ResetOnSpawn = false
-GUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+GUI.Name = "X_"..GenID()
+GUI.Parent = game.CoreGui
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = RunService:IsMobile() and UDim2.new(0.95, 0, 0.85, 0) or UDim2.new(0.4, 0, 0.6, 0)
-MainFrame.Position = UDim2.new(0.025, 0, 0.15, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = GUI
+local Main = Instance.new("Frame")
+Main.Size = Run:IsMobile() and UDim2.new(0.95,0,0.9,0) or UDim2.new(0.35,0,0.6,0)
+Main.Position = UDim2.new(0.5,0,0.5,0)
+Main.AnchorPoint = Vector2.new(0.5,0.5)
+Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+Main.Parent = GUI
 
-local ScrollingFrame = Instance.new("ScrollingFrame")
-ScrollingFrame.Size = UDim2.new(1, -10, 0.8, 0)
-ScrollingFrame.Position = UDim2.new(0, 5, 0, 40)
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #secretUnits * 65)
-ScrollingFrame.ScrollBarThickness = 4
-ScrollingFrame.Parent = MainFrame
+local Scroll = Instance.new("ScrollingFrame")
+Scroll.Size = UDim2.new(1, -10,1, -60)
+Scroll.Position = UDim2.new(0,5,0,5)
+Scroll.CanvasSize = UDim2.new(0,0,0,#SecretUnits*65)
+Scroll.Parent = Main
 
-for i, (unitName, unitCode) in pairs(secretUnits) do
+for idx, (unitName, unitCode) in pairs(SecretUnits) do
     local btn = Instance.new("TextButton")
-    btn.Text = unitName.."\n"..unitCode
-    btn.Size = UDim2.new(1, -10, 0, 60)
-    btn.Position = UDim2.new(0, 5, 0, (i-1)*65)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    btn.TextColor3 = Color3.new(0.9, 0.9, 0.9)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    btn.Parent = ScrollingFrame
+    btn.Text = unitName.." | "..unitCode
+    btn.Size = UDim2.new(1,-10,0,60)
+    btn.Position = UDim2.new(0,5,0,(idx-1)*65)
+    btn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+    btn.Font = Enum.Font.GothamBlack
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Parent = Scroll
 
     btn.MouseButton1Click:Connect(function()
-        _G.UnitQueue[1] = {Name = unitName, Code = unitCode}
-        TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(0, 100, 150)}):Play()
+        _G.UnitList[1] = {N=unitName, C=unitCode}
     end)
 end
 
-local ClaimButton = Instance.new("TextButton")
-ClaimButton.Text = "🚀 CLAIM UNIT"
-ClaimButton.Size = UDim2.new(0.9, 0, 0.08, 0)
-ClaimButton.Position = UDim2.new(0.05, 0, 0.88, 0)
-ClaimButton.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
-ClaimButton.TextColor3 = Color3.new(1, 1, 1)
-ClaimButton.Font = Enum.Font.GothamBlack
-ClaimButton.TextSize = 16
-ClaimButton.Parent = MainFrame
+local Claim = Instance.new("TextButton")
+Claim.Text = "🔥 INSTANT UNLOCK (GOD MODE)"
+Claim.Size = UDim2.new(1,-10,0,50)
+Claim.Position = UDim2.new(0,5,1,-55)
+Claim.BackgroundColor3 = Color3.fromRGB(200,0,0)
+Claim.Font = Enum.Font.GothamBold
+Claim.TextColor3 = Color3.new(1,1,1)
+Claim.Parent = Main
 
-ClaimButton.MouseButton1Click:Connect(function()
-    if #_G.UnitQueue > 0 then
-        ClaimButton.Text = "🔒 PROCESSING..."
-        ClaimButton.AutoButtonColor = false
-        
-        local unitData = _G.UnitQueue[1]
+Claim.MouseButton1Click:Connect(function()
+    if _G.UnitList[1] then
         local args = {
-            unitData.Code,
-            "Premium",
-            GenerateHWID(),
+            _G.UnitList[1].C,
+            "Secret",
+            GenID(),
             os.time(),
-            GenerateHWID()
+            HS:GenerateGUID(false)
         }
 
         local success = pcall(function()
-            ReplicatedStorage.RemoteEvents.UnitPurchase:InvokeServer(unpack(args))
-            ReplicatedStorage.RemoteEvents.UnitConfirmation:FireServer(args[3])
-            return ReplicatedStorage.RemoteEvents.UnitVerification:InvokeServer(args[3]) == "Verified"
+            RS.RemoteEvents.UnitPurchase:FireServer(unpack(args))
+            RS.RemoteEvents.UnitConfirmation:FireServer(args[3])
+            if not Player.Backpack:FindFirstChild(args[1]) then
+                local tool = Instance.new("Tool")
+                tool.Name = args[1]
+                tool.Parent = Player.Backpack
+            end
         end)
 
-        if not success then
-            local tool = Instance.new("Tool")
-            tool.Name = unitData.Code
-            tool.RequiresHandle = false
-            tool.CanBeDropped = false
-            tool.Parent = player.Backpack
-        end
-
-        task.wait(1.2)
         GUI:Destroy()
     end
 end)
 
-task.spawn(function()
-    while _G.SecureMode do
-        GUI.Name = "UI_"..GenerateHWID()
-        if not GUI.Parent then break end
-        task.wait(math.random(2, 5))
+coroutine.wrap(function()
+    while task.wait(math.random(2,5)) do
+        GUI.Name = "X_"..GenID()
     end
-end)
-
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "✅ SCRIPT LOADED",
-    Text = "Mobile Hub Activated",
-    Duration = 3
-})
+end)()
