@@ -1,88 +1,108 @@
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local HttpService = game:GetService("HttpService")
-local TweenService = game:GetService("TweenService")
+local module = {_SECRET_RARITY = 0.0025}
 
-local player = Players.LocalPlayer
-local secretUnits = {
-    ["Golden Adult"] = "UR_G0LD3N_SSS",
-    ["Radiant Monarch"] = "SSR_R4D14NT",
-    ["Poseidon"] = "LR_P0S31D0N",
-    ["Voidwalker"] = "MYTHIC_V01D",
-    ["Timekeeper"] = "DIV1NE_T1ME"
+local _ENV = getgenv()
+local secureConfig = {
+    SummonAnchor = "SummonZoneMarker",
+    SecretUnits = {
+        ["The Gamer"] = {id = 88721, evolution = "Demon Greatsword", rarity = 0.009},
+        ["Chance Taker"] = {id = 66534, evolution = "Roulette Machine", rarity = 0.007},
+        ["Poseidon (Sea Sovereign)"] = {id = 44328, ability = "30% Freeze: Slow"},
+        ["Radiant Monarch"] = {id = 27159, bleed = "175% Damage/7 ticks"},
+        ["Sage (Deity)"] = {id = 54891, spa = "High"},
+        ["Shadow Master"] = {id = 62904, burn = "60% Damage/4 ticks"}
+    },
+    RemotePath = "GameNetwork.TransactionSystem"
 }
 
-local GUI = Instance.new("ScreenGui", game.CoreGui)
-GUI.Name = "AnimeDefendersHub_" .. math.random(1000, 9999)
+local function validateEnvironment()
+    local summonZone = game:GetService("Workspace"):FindFirstChild(secureConfig.SummonAnchor)
+    if not summonZone then return false end
+    local playerChar = game.Players.LocalPlayer.Character
+    if not playerChar then return false end
+    local rootPart = playerChar:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return false end
+    local distance = (rootPart.Position - summonZone.Position).Magnitude
+    return distance <= summonZone.Size.X * 1.25
+end
 
-local MainFrame = Instance.new("Frame", GUI)
-MainFrame.Size = UDim2.new(0.35, 0, 0.6, 0)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-MainFrame.Active = true
-MainFrame.Draggable = true
+function module.createSecretInterface()
+    if not validateEnvironment() then 
+        warn("[Security] Execution context invalid")
+        return 
+    end
 
-local ScrollingFrame = Instance.new("ScrollingFrame", MainFrame)
-ScrollingFrame.Size = UDim2.new(0.9, 0, 0.8, 0)
-ScrollingFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #secretUnits * 60)
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "GhostSummonerUI"
+    gui.Parent = game:GetService("CoreGui")
 
-local function SecureAddUnit(unitName, unitCode)
-    local args = {
-        unitCode,
-        "Secret",
-        HttpService:GenerateGUID(false),
-        os.time()
-    }
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0.25, 0, 0.6, 0)
+    mainFrame.Position = UDim2.new(0.75, 0, 0.2, 0)
+    mainFrame.BackgroundTransparency = 0.9
+    mainFrame.Parent = gui
+
+    local scroll = Instance.new("ScrollingFrame")
+    scroll.Size = UDim2.new(0.95, 0, 0.95, 0)
+    scroll.CanvasSize = UDim2.new(0, 0, #secureConfig.SecretUnits * 0.2, 0)
+    scroll.Parent = mainFrame
+
+    for unitName, unitData in pairs(secureConfig.SecretUnits) do
+        local btn = Instance.new("TextButton")
+        btn.Text = string.format("%s\nID: %d | Rarity: %.3f%%", unitName, unitData.id, unitData.rarity * 100)
+        btn.Size = UDim2.new(0.98, 0, 0.18, 0)
+        btn.MouseButton1Click:Connect(function()
+            if validateEnvironment() then
+                _ENV.activateSummonProtocol(unitData.id)
+            else
+                gui:Destroy()
+            end
+        end)
+        btn.Parent = scroll
+    end
+end
+
+function _ENV.activateSummonProtocol(unitId)
+    local validationCounter = 0
+    local maxAttempts = 5
     
-    task.wait(math.random(0.3, 1.2))
-    
-    local success = pcall(function()
-        ReplicatedStorage.RemoteEvents.UnitPurchase:FireServer(unpack(args))
+    while validationCounter < maxAttempts do
+        if not validateEnvironment() then break end
         
-        if not player.Backpack:FindFirstChild(unitCode) then
-            local unit = Instance.new("StringValue")
-            unit.Name = unitCode
-            unit.Value = unitName
-            unit.Parent = player.Backpack
+        local args = {
+            [1] = "SecretCompanion",
+            [2] = unitId,
+            [3] = game:GetService("Players").LocalPlayer,
+            [4] = os.time()
+        }
+        
+        local success, response = pcall(function()
+            return game:GetService("ReplicatedStorage"):WaitForChild(secureConfig.RemotePath):FireServer(unpack(args))
+        end)
+        
+        if success then
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "SECRET SUMMONED",
+                Text = "Unit " .. unitId .. " acquired!",
+                Icon = "rbxassetid://4458901886",
+                Duration = 5
+            })
+            break
+        else
+            validationCounter = validationCounter + 1
+            task.wait(math.random(1, 3))
+        end
+    end
+end
+
+if validateEnvironment() then
+    module.createSecretInterface()
+else
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(3)
+        if validateEnvironment() then
+            module.createSecretInterface()
         end
     end)
-    
-    return success
 end
 
-local yPos = 5
-for unitName, unitCode in pairs(secretUnits) do
-    local btn = Instance.new("TextButton", ScrollingFrame)
-    btn.Text = unitName
-    btn.Size = UDim2.new(0.9, 0, 0, 50)
-    btn.Position = UDim2.new(0.05, 0, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-    btn.TextColor3 = Color3.new(0.9, 0.9, 0.9)
-    
-    btn.MouseButton1Click:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
-        TweenService:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-        }):Play()
-        
-        SecureAddUnit(unitName, unitCode)
-    end)
-    
-    yPos += 55
-end
-
-local ClaimAllBtn = Instance.new("TextButton", MainFrame)
-ClaimAllBtn.Text = "Claim All Units"
-ClaimAllBtn.Size = UDim2.new(0.8, 0, 0.08, 0)
-ClaimAllBtn.Position = UDim2.new(0.1, 0, 0.9, 0)
-ClaimAllBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 150)
-ClaimAllBtn.TextColor3 = Color3.new(1, 1, 1)
-
-ClaimAllBtn.MouseButton1Click:Connect(function()
-    for unitName, unitCode in pairs(secretUnits) do
-        SecureAddUnit(unitName, unitCode)
-        task.wait(0.5)
-    end
-    GUI:Destroy()
-end)
+return module
