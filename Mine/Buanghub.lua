@@ -1,16 +1,19 @@
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+
+local player = Players.LocalPlayer
 
 local _G = getgenv()
 _G.SecureMode = true
 _G.UnitQueue = {}
 
+-- Create GUI
 local GUI = Instance.new("ScreenGui")
-GUI.Name = "MobileHub_"..math.random(10000,99999)
+GUI.Name = "MobileHub_"..math.random(10000, 99999)
 GUI.Parent = game:GetService("CoreGui")
 GUI.ResetOnSpawn = false
 
@@ -42,19 +45,23 @@ local secretUnits = {
 local function MilitaryGradeRequest(unitID)
     local SecurityToken = HttpService:GenerateGUID(false)
     local args = {
-        [1] = unitID,
-        [2] = "Premium",
-        [3] = SecurityToken,
-        [4] = os.time()
+        unitID,
+        "Premium",
+        SecurityToken,
+        os.time()
     }
-    
+
     local success, response = pcall(function()
         ReplicatedStorage.RemoteEvents.UnitPurchase:InvokeServer(unpack(args))
         ReplicatedStorage.RemoteEvents.UnitConfirmation:FireServer(SecurityToken)
         return ReplicatedStorage.RemoteEvents.UnitVerification:InvokeServer(SecurityToken)
     end)
-    
-    return success and response == "Verified"
+
+    if success and response == "Verified" then
+        return true
+    else
+        return false
+    end
 end
 
 local function ForceAddToBackpack(unitName)
@@ -86,7 +93,7 @@ for i, (unitName, unitCode) in pairs(secretUnits) do
     btn.TextSize = 14
     
     btn.MouseButton1Click:Connect(function()
-        _G.UnitQueue[1] = {Name=unitName, Code=unitCode}
+        table.insert(_G.UnitQueue, {Name = unitName, Code = unitCode})
         TweenService:Create(btn, TweenInfo.new(0.2), {
             BackgroundColor3 = Color3.fromRGB(0, 80, 120)
         }):Play()
@@ -104,27 +111,29 @@ ClaimButton.MouseButton1Click:Connect(function()
     if #_G.UnitQueue > 0 then
         ClaimButton.Text = "🔐 Processing..."
         
-        local success = MilitaryGradeRequest(_G.UnitQueue[1].Code)
+        local currentUnit = table.remove(_G.UnitQueue, 1)
+        local success = MilitaryGradeRequest(currentUnit.Code)
         
         if not success then
-            ForceAddToBackpack(_G.UnitQueue[1].Name)
+            ForceAddToBackpack(currentUnit.Name)
         end
         
-        game:GetService("StarterGui"):SetCore("SendNotification", {
+        StarterGui:SetCore("SendNotification", {
             Title = "✅ Operation Successful",
-            Text = "Unit: ".._G.UnitQueue[1].Name,
+            Text = "Unit: "..currentUnit.Name,
             Icon = "rbxassetid://11178404362",
             Duration = 5
         })
         
-        _G.UnitQueue = {}
-        GUI:Destroy()
+        if #_G.UnitQueue == 0 then
+            GUI:Destroy()
+        end
     end
 end)
 
 task.spawn(function()
     while _G.SecureMode do
-        GUI.Name = "MH_"..math.random(100000,999999).."_"..os.time()
+        GUI.Name = "MH_"..math.random(100000, 999999).."_"..os.time()
         for i = 1, 100 do
             math.random()
         end
@@ -132,7 +141,7 @@ task.spawn(function()
     end
 end)
 
-game:GetService("StarterGui"):SetCore("SendNotification", {
+StarterGui:SetCore("SendNotification", {
     Title = "✅ Script Ready",
     Text = "Successfully loaded on mobile",
     Duration = 3
