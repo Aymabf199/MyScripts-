@@ -2,10 +2,13 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
 
 local GUI = Instance.new("ScreenGui", game:GetService("CoreGui"))
-GUI.Name = "UltimateUnitHub"
+GUI.Name = "UltimateUnitHub_" .. HttpService:GenerateGUID(false)
 GUI.ResetOnSpawn = false
+GUI.Enabled = false
 
 local MainFrame = Instance.new("Frame", GUI)
 MainFrame.Size = UDim2.new(0.35, 0, 0.65, 0)
@@ -81,16 +84,14 @@ ClaimButton.TextColor3 = Color3.new(1, 1, 0.8)
 ClaimButton.Font = Enum.Font.GothamBold
 ClaimButton.TextSize = 14
 
-ClaimButton.MouseButton1Click:Connect(function()
+local function claimUnit()
     if selectedUnit then
         ClaimButton.Text = "🔄 Processing..."
         ClaimButton.AutoButtonColor = false
         
-        -- Human-like pattern simulation
         local randomDelay = math.random(300, 1500)/1000
         task.wait(randomDelay)
         
-        -- Secure request handling
         local success, response = pcall(function()
             ReplicatedStorage.RemoteEvents.UnitPurchase:FireServer(
                 selectedUnit,
@@ -98,7 +99,6 @@ ClaimButton.MouseButton1Click:Connect(function()
                 "PremiumPass"
             )
             
-            -- Direct inventory addition (fallback)
             if not player.Backpack:FindFirstChild(selectedUnit) then
                 local unitValue = Instance.new("StringValue")
                 unitValue.Name = selectedUnit
@@ -106,7 +106,6 @@ ClaimButton.MouseButton1Click:Connect(function()
             end
         end)
         
-        -- Result handling
         if success then
             ClaimButton.Text = "✅ Success!"
             task.wait(0.8)
@@ -124,13 +123,14 @@ ClaimButton.MouseButton1Click:Connect(function()
         end
         ClaimButton.AutoButtonColor = true
     end
-end)
+end
 
--- Anti-detection measures
+ClaimButton.MouseButton1Click:Connect(claimUnit)
+
 task.spawn(function()
     wait(math.random(3, 7))
     GUI.Enabled = true
-    game:GetService("RunService").RenderStepped:Connect(function()
-        GUI.Name = tostring(math.random(100000,999999))
+    RunService.RenderStepped:Connect(function()
+        GUI.Name = "UltimateUnitHub_" .. HttpService:GenerateGUID(false)
     end)
 end)
