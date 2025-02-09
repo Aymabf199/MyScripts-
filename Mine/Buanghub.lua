@@ -1,4 +1,4 @@
--- Script to duplicate units in Anime Defenders map in Roblox
+-- Main script to duplicate units in Anime Defenders map in Roblox
 
 -- Function to duplicate a unit a specified number of times
 local function duplicateUnit(unit, count)
@@ -23,8 +23,8 @@ local function createUI()
     ScreenGui.Name = "DuplicateUnitsGui"
     
     Frame.Name = "DuplicateUnitsFrame"
-    Frame.Size = UDim2.new(0, 300, 0, 400)
-    Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    Frame.Size = UDim2.new(0, 400, 0, 600)
+    Frame.Position = UDim2.new(0.5, -200, 0.5, -300)
     Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Frame.BackgroundTransparency = 0.5
     Frame.Draggable = true
@@ -80,7 +80,7 @@ local function updateUnitsList(UnitsListFrame, SelectedUnitLabel)
     end
     
     for _, item in pairs(backpack:GetChildren()) do
-        if item.Name == "Crimson Tyrant" then
+        if item:IsA("Tool") then
             local UnitButton = Instance.new("TextButton", UnitsListFrame)
             UnitButton.Size = UDim2.new(1, -10, 0, 50)
             UnitButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -110,7 +110,7 @@ local function main()
         if count and selectedUnit then
             duplicateUnit(selectedUnit, count)
         else
-            print("Please select the 'Crimson Tyrant' unit and enter a valid number for duplication count.")
+            print("Please select a unit and enter a valid number for duplication count.")
         end
     end)
 end
@@ -159,7 +159,7 @@ local function makeFrameDraggable(frame)
 end
 
 -- Apply draggable functionality to the main frame
-makeFrameDraggable(script.Parent.DuplicateCrimsonTyrantFrame)
+makeFrameDraggable(script.Parent.DuplicateUnitsFrame)
 
 -- Function to handle deletion of units
 local function handleDeletion(unit)
@@ -206,7 +206,7 @@ local function mainExtended()
         if count and selectedUnit then
             duplicateUnit(selectedUnit, count)
         else
-            print("Please select the 'Crimson Tyrant' unit and enter a valid number for duplication count.")
+            print("Please select a unit and enter a valid number for duplication count.")
         end
     end)
 end
