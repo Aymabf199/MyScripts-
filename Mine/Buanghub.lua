@@ -5,10 +5,17 @@ local function duplicateUnit(player, unitName, quantity)
         return
     end
 
-    -- Find the original unit in the player's Backpack
-    local originalUnit = player.Backpack:FindFirstChild(unitName)
+    -- Search for the unit in multiple locations
+    local possibleLocations = {player.Backpack, workspace, game:GetService("ReplicatedStorage")}
+    local originalUnit = nil
+
+    for _, location in ipairs(possibleLocations) do
+        originalUnit = location:FindFirstChild(unitName)
+        if originalUnit then break end
+    end
+
     if not originalUnit then
-        warn("Unit '" .. unitName .. "' not found in Backpack!")
+        warn("Unit '" .. unitName .. "' not found!")
         return
     end
 
@@ -25,14 +32,14 @@ end
 local function createGui(player)
     -- Create ScreenGui
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "UnitDuplicator"
+    screenGui.Name = "AdvancedUnitDuplicator"
     screenGui.ResetOnSpawn = false
     screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
     -- Create Main Frame
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 300, 0, 200)
-    mainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+    mainFrame.Size = UDim2.new(0, 350, 0, 400)
+    mainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
     mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     mainFrame.BorderSizePixel = 0
     mainFrame.Active = true
@@ -41,7 +48,7 @@ local function createGui(player)
 
     -- Create Title Label
     local titleLabel = Instance.new("TextLabel")
-    titleLabel.Text = "Unit Duplicator"
+    titleLabel.Text = "Advanced Unit Duplicator"
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.TextSize = 18
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -50,17 +57,69 @@ local function createGui(player)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.Parent = mainFrame
 
-    -- Create Unit Name TextBox
-    local unitTextBox = Instance.new("TextBox")
-    unitTextBox.PlaceholderText = "Enter Unit Name..."
-    unitTextBox.Font = Enum.Font.Gotham
-    unitTextBox.TextSize = 16
-    unitTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    unitTextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    unitTextBox.Size = UDim2.new(1, -20, 0, 30)
-    unitTextBox.Position = UDim2.new(0, 10, 0, 40)
-    unitTextBox.ClearTextOnFocus = false
-    unitTextBox.Parent = mainFrame
+    -- Create Search TextBox
+    local searchBox = Instance.new("TextBox")
+    searchBox.PlaceholderText = "Search Units..."
+    searchBox.Font = Enum.Font.Gotham
+    searchBox.TextSize = 16
+    searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    searchBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    searchBox.Size = UDim2.new(1, -20, 0, 30)
+    searchBox.Position = UDim2.new(0, 10, 0, 40)
+    searchBox.ClearTextOnFocus = false
+    searchBox.Parent = mainFrame
+
+    -- Create ScrollFrame for Units List
+    local scrollFrame = Instance.new("ScrollingFrame")
+    scrollFrame.Size = UDim2.new(1, -20, 0, 250)
+    scrollFrame.Position = UDim2.new(0, 10, 0, 80)
+    scrollFrame.BackgroundTransparency = 1
+    scrollFrame.ScrollBarThickness = 8
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    scrollFrame.Parent = mainFrame
+
+    -- Function to populate the units list
+    local function populateUnitsList()
+        scrollFrame:ClearAllChildren()
+
+        for _, unit in ipairs(player.Backpack:GetChildren()) do
+            if unit:IsA("Tool") or unit:IsA("Model") then
+                local button = Instance.new("TextButton")
+                button.Text = unit.Name
+                button.Font = Enum.Font.Gotham
+                button.TextSize = 16
+                button.TextColor3 = Color3.fromRGB(255, 255, 255)
+                button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                button.Size = UDim2.new(1, 0, 0, 30)
+                button.Parent = scrollFrame
+
+                -- Button Click Event
+                button.MouseButton1Click:Connect(function()
+                    searchBox.Text = unit.Name -- Auto-fill search box with selected unit
+                end)
+            end
+        end
+    end
+
+    -- Populate units list initially
+    populateUnitsList()
+
+    -- Update units list when Backpack changes
+    player.Backpack.ChildAdded:Connect(populateUnitsList)
+    player.Backpack.ChildRemoved:Connect(populateUnitsList)
+
+    -- Handle search functionality
+    searchBox.Changed:Connect(function(prop)
+        if prop == "Text" then
+            local query = searchBox.Text:lower()
+            for _, button in ipairs(scrollFrame:GetChildren()) do
+                if button:IsA("TextButton") then
+                    button.Visible = string.find(button.Text:lower(), query, 1, true) ~= nil
+                end
+            end
+        end
+    end)
 
     -- Create Quantity TextBox
     local quantityTextBox = Instance.new("TextBox")
@@ -70,7 +129,7 @@ local function createGui(player)
     quantityTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     quantityTextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     quantityTextBox.Size = UDim2.new(1, -20, 0, 30)
-    quantityTextBox.Position = UDim2.new(0, 10, 0, 80)
+    quantityTextBox.Position = UDim2.new(0, 10, 0, 340)
     quantityTextBox.ClearTextOnFocus = false
     quantityTextBox.Parent = mainFrame
 
@@ -82,12 +141,12 @@ local function createGui(player)
     duplicateButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     duplicateButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
     duplicateButton.Size = UDim2.new(1, -20, 0, 40)
-    duplicateButton.Position = UDim2.new(0, 10, 0, 120)
+    duplicateButton.Position = UDim2.new(0, 10, 0, 380)
     duplicateButton.Parent = mainFrame
 
     -- Button Click Event
     duplicateButton.MouseButton1Click:Connect(function()
-        local unitName = unitTextBox.Text
+        local unitName = searchBox.Text
         local quantity = tonumber(quantityTextBox.Text)
 
         if unitName == "" then
@@ -100,7 +159,6 @@ local function createGui(player)
             return
         end
 
-        -- Call the duplication function
         duplicateUnit(player, unitName, quantity)
     end)
 end
