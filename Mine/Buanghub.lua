@@ -71,7 +71,7 @@ end
 -- Function to update the units list in the UI
 local function updateUnitsList(UnitsListFrame, SelectedUnitLabel)
     local player = game.Players.LocalPlayer
-    local backpack = player:WaitForChild("Backpack")
+    local unitsFolder = game.Workspace:FindFirstChild("Units")
     
     for _, child in pairs(UnitsListFrame:GetChildren()) do
         if child:IsA("TextButton") then
@@ -79,8 +79,8 @@ local function updateUnitsList(UnitsListFrame, SelectedUnitLabel)
         end
     end
     
-    for _, item in pairs(backpack:GetChildren()) do
-        if item:IsA("Tool") then
+    if unitsFolder then
+        for _, item in pairs(unitsFolder:GetChildren()) do
             local UnitButton = Instance.new("TextButton", UnitsListFrame)
             UnitButton.Size = UDim2.new(1, -10, 0, 50)
             UnitButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
