@@ -1,4 +1,4 @@
--- Function to duplicate units
+-- Function to duplicate a unit
 local function duplicateUnit(player, unitName, quantity)
     if not player or not player.Backpack then return end
 
@@ -18,22 +18,65 @@ local function duplicateUnit(player, unitName, quantity)
     print("Successfully duplicated " .. unitName .. " x" .. quantity)
 end
 
--- Function to increase player's health
-local function increaseHealth(player, amount)
-    if not player or not player.Character then return end
+-- Function to create the GUI
+local function createGui(player)
+    -- Create ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "UnitDuplicator"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Find the Humanoid in the player's character
-    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then
-        warn("Humanoid not found!")
-        return
-    end
+    -- Create Frame
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 250, 0, 150)
+    frame.Position = UDim2.new(0.5, -125, 0.5, -75)
+    frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    frame.BorderSizePixel = 0
+    frame.Parent = screenGui
 
-    -- Increase MaxHealth and Health
-    humanoid.MaxHealth = humanoid.MaxHealth + amount
-    humanoid.Health = humanoid.Health + amount
+    -- Create Title Label
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Text = "Unit Duplicator"
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 18
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Size = UDim2.new(1, 0, 0, 30)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.Parent = frame
 
-    print("Increased health by " .. amount)
+    -- Create TextBox for Unit Name
+    local textBox = Instance.new("TextBox")
+    textBox.PlaceholderText = "Enter Unit Name"
+    textBox.Font = Enum.Font.Gotham
+    textBox.TextSize = 16
+    textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    textBox.Size = UDim2.new(1, -20, 0, 30)
+    textBox.Position = UDim2.new(0, 10, 0, 40)
+    textBox.ClearTextOnFocus = false
+    textBox.Parent = frame
+
+    -- Create Duplicate Button
+    local duplicateButton = Instance.new("TextButton")
+    duplicateButton.Text = "Duplicate"
+    duplicateButton.Font = Enum.Font.GothamBold
+    duplicateButton.TextSize = 16
+    duplicateButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    duplicateButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+    duplicateButton.Size = UDim2.new(1, -20, 0, 40)
+    duplicateButton.Position = UDim2.new(0, 10, 0, 80)
+    duplicateButton.Parent = frame
+
+    -- Button Click Event
+    duplicateButton.MouseButton1Click:Connect(function()
+        local unitName = textBox.Text
+        if unitName ~= "" then
+            duplicateUnit(player, unitName, 10) -- Change '10' to desired quantity
+        else
+            warn("Please enter a valid unit name!")
+        end
+    end)
 end
 
 -- Main function to execute the script
@@ -47,18 +90,8 @@ local function main()
     -- Wait until the player's character and Backpack are loaded
     repeat wait() until localPlayer.Character and localPlayer:FindFirstChild("Backpack")
 
-    -- List of units you want to duplicate (add your unit names here)
-    local unitsToDuplicate = {"Ruffy", "Naruto", "Sasuke", "Goku"} -- Replace with your actual unit names
-    local duplicationQuantity = 10 -- Number of duplicates per unit
-    local healthIncreaseAmount = 500 -- Amount to increase health
-
-    -- Duplicate each unit in the list
-    for _, unitName in ipairs(unitsToDuplicate) do
-        duplicateUnit(localPlayer, unitName, duplicationQuantity)
-    end
-
-    -- Increase player's health
-    increaseHealth(localPlayer, healthIncreaseAmount)
+    -- Create the GUI
+    createGui(localPlayer)
 end
 
 -- Execute the main function
