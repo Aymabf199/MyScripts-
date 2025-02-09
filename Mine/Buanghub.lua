@@ -1,11 +1,14 @@
 -- Function to duplicate a unit
 local function duplicateUnit(player, unitName, quantity)
-    if not player or not player.Backpack then return end
+    if not player or not player.Backpack then
+        warn("Player or Backpack not found!")
+        return
+    end
 
     -- Find the original unit in the player's Backpack
     local originalUnit = player.Backpack:FindFirstChild(unitName)
     if not originalUnit then
-        warn("Unit '" .. unitName .. "' not found!")
+        warn("Unit '" .. unitName .. "' not found in Backpack!")
         return
     end
 
@@ -97,6 +100,7 @@ local function createGui(player)
             return
         end
 
+        -- Call the duplication function
         duplicateUnit(player, unitName, quantity)
     end)
 end
