@@ -1,4 +1,4 @@
--- Script to duplicate the "Crimson Tyrant" unit in Anime Defenders map in Roblox
+-- Script to duplicate units in Anime Defenders map in Roblox
 
 -- Function to duplicate a unit a specified number of times
 local function duplicateUnit(unit, count)
@@ -20,9 +20,9 @@ local function createUI()
     local ActivateButton = Instance.new("TextButton", Frame)
     local UIListLayout = Instance.new("UIListLayout", UnitsListFrame)
     
-    ScreenGui.Name = "DuplicateCrimsonTyrantGui"
+    ScreenGui.Name = "DuplicateUnitsGui"
     
-    Frame.Name = "DuplicateCrimsonTyrantFrame"
+    Frame.Name = "DuplicateUnitsFrame"
     Frame.Size = UDim2.new(0, 300, 0, 400)
     Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
     Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
