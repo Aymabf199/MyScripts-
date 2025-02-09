@@ -1,4 +1,4 @@
--- Script to duplicate selected unit in Anime Defenders map in Roblox
+-- Script to duplicate the "Crimson Tyrant" unit in Anime Defenders map in Roblox
 
 -- Function to duplicate a unit a specified number of times
 local function duplicateUnit(unit, count)
@@ -13,33 +13,20 @@ end
 local function createUI()
     local ScreenGui = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
     local Frame = Instance.new("Frame", ScreenGui)
-    local UnitsListFrame = Instance.new("Frame", Frame)
     local UnitsListButton = Instance.new("TextButton", Frame)
     local SelectedUnitLabel = Instance.new("TextLabel", Frame)
     local DuplicationCountTextBox = Instance.new("TextBox", Frame)
     local ActivateButton = Instance.new("TextButton", Frame)
-    local UIListLayout = Instance.new("UIListLayout", UnitsListFrame)
     
-    ScreenGui.Name = "DuplicateUnitsGui"
+    ScreenGui.Name = "DuplicateCrimsonTyrantGui"
     
-    Frame.Name = "DuplicateUnitsFrame"
+    Frame.Name = "DuplicateCrimsonTyrantFrame"
     Frame.Size = UDim2.new(0, 300, 0, 400)
     Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
     Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Frame.BackgroundTransparency = 0.5
     Frame.Draggable = true
     Frame.Active = true
-
-    UnitsListFrame.Name = "UnitsListFrame"
-    UnitsListFrame.Size = UDim2.new(1, 0, 0.6, 0)
-    UnitsListFrame.Position = UDim2.new(0, 0, 0, 0)
-    UnitsListFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    UnitsListFrame.BackgroundTransparency = 0.5
-    UnitsListFrame.Visible = false
-    
-    UIListLayout.FillDirection = Enum.FillDirection.Vertical
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 5)
     
     UnitsListButton.Name = "UnitsListButton"
     UnitsListButton.Size = UDim2.new(1, 0, 0.1, 0)
@@ -65,43 +52,31 @@ local function createUI()
     ActivateButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
     ActivateButton.Text = "Activate Duplication"
     
-    return UnitsListButton, UnitsListFrame, SelectedUnitLabel, DuplicationCountTextBox, ActivateButton
+    return UnitsListButton, SelectedUnitLabel, DuplicationCountTextBox, ActivateButton
 end
 
 -- Function to update the units list in the UI
-local function updateUnitsList(UnitsListFrame, SelectedUnitLabel)
+local function updateUnitsList(SelectedUnitLabel)
     local player = game.Players.LocalPlayer
     local unitsFolder = game.Workspace:FindFirstChild("Units")
     
-    for _, child in pairs(UnitsListFrame:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
-    end
-    
     if unitsFolder then
         for _, item in pairs(unitsFolder:GetChildren()) do
-            local UnitButton = Instance.new("TextButton", UnitsListFrame)
-            UnitButton.Size = UDim2.new(1, -10, 0, 50)
-            UnitButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            UnitButton.Text = item.Name
-            UnitButton.MouseButton1Click:Connect(function()
+            if item.Name == "Crimson Tyrant" then
                 SelectedUnitLabel.Text = "Selected Unit: " .. item.Name
                 SelectedUnitLabel:SetAttribute("SelectedUnit", item)
-            end)
+                break
+            end
         end
     end
 end
 
 -- Main script execution
 local function main()
-    local UnitsListButton, UnitsListFrame, SelectedUnitLabel, DuplicationCountTextBox, ActivateButton = createUI()
+    local UnitsListButton, SelectedUnitLabel, DuplicationCountTextBox, ActivateButton = createUI()
     
     UnitsListButton.MouseButton1Click:Connect(function()
-        UnitsListFrame.Visible = not UnitsListFrame.Visible
-        if UnitsListFrame.Visible then
-            updateUnitsList(UnitsListFrame, SelectedUnitLabel)
-        end
+        updateUnitsList(SelectedUnitLabel)
     end)
     
     ActivateButton.MouseButton1Click:Connect(function()
@@ -110,7 +85,7 @@ local function main()
         if count and selectedUnit then
             duplicateUnit(selectedUnit, count)
         else
-            print("Please select a unit and enter a valid number for duplication count.")
+            print("Please select the 'Crimson Tyrant' unit and enter a valid number for duplication count.")
         end
     end)
 end
