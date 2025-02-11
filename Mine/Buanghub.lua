@@ -5,7 +5,7 @@ end
 task.wait(math.random())
 
 local games = {
-    [12229756] = 'https://api.luarmor.net/files/v3/loaders/223ebf430943b6eeb6b81a550e5dcd52.lua',
+    [12229756] = 'https://api.luarmor.net/files/v3/loaders/223ebf430943b6eeb6b81a550e5dcb52.lua',
     [5292947] = 'https://api.luarmor.net/files/v3/loaders/5626ab81ffceae865d22d54cb5042edf.lua',
     [15022320] = 'https://api.luarmor.net/files/v3/loaders/5626ab81ffceae865d22d54cb5042edf.lua',
     [5102326] = 'https://api.luarmor.net/files/v3/loaders/1b4c42f5913d7a5b7be56ee7766eb814.lua',
@@ -18,5 +18,19 @@ local games = {
 
 if games[game.CreatorId] then
     task.wait(math.random())
-    loadstring(game:HttpGet(games[game.CreatorId]))()
+    local success, result = pcall(function()
+        if game.CreatorId == 34121350 or game.CreatorId == 15762744 then
+            loadstring(game:HttpGet(games[game.CreatorId]))()
+        elseif game.CreatorId == 17219742 then
+            loadstring(game:HttpGet(games[game.CreatorId]))()
+            loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/695158390d5a4b3bae957c39a2f83636.lua"))()
+        else
+            loadstring(game:HttpGet(games[game.CreatorId]))()
+        end
+    end)
+    if not success then
+        warn("An error occurred: " .. tostring(result))
+    end
+else
+    warn("This game is not supported by the script.")
 end
